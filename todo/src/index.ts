@@ -10,7 +10,7 @@ let todos : TodoItem[] = [
 
 let collection : TodoCollection = new TodoCollection("Nelson", todos);
 
-let newId : number = collection.addTodo("Go for run");
-let todoItem : TodoItem = collection.getTodoById(newId);
-
-todoItem.printDetails();
+console.clear();
+console.log(`${collection.userName}'s Todo List`);
+console.log(`${collection.getItemCounts().incomplete} items to do`);
+collection.getTodoItems(true).forEach(item => item.printDetails());
