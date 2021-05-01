@@ -26,24 +26,12 @@ podman run -dt --name learn-typescript localhost/learn-typescript
 
 ### ToDo
 
-Execute ```/bin/bash``` inside the container with an interactive terminal.
-
 #### Docker
 ```
-podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash
+docker exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'npm install && tsc && node dist/index.js'
 ```
 
 #### Podman
 ```
-podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash
-```
-
-#### Run ToDo Project
-Install packages from ```npm``` and execute the typescript compiler. Run the
- project with ```nodejs``` from the ```dist``` folder.
-
-```
-npm install
-tsc
-node dist/index.js
+podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'npm install && tsc && node dist/index.js'
 ```
