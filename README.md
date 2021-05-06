@@ -12,14 +12,14 @@ ISBN-13 (electronic): 978-1-4842-4979-6
 
 ```
 docker build -t learn-typescript .
-docker run -dt --name learn-typescript learn-typescript
+docker run -dt -v $(pwd)/todo:/usr/src/todo --name learn-typescript learn-typescript
 ```
 
 ### Buildah / Podman
 
 ```
 buildah bud -f Dockerfile -t learn-typescript
-podman run -dt --name learn-typescript localhost/learn-typescript
+podman run -dt -v $(pwd)/todo:/usr/src/todo --name learn-typescript localhost/learn-typescript
 ```
 
 ## Running Projects
@@ -27,11 +27,16 @@ podman run -dt --name learn-typescript localhost/learn-typescript
 ### ToDo
 
 #### Docker
+
+Install, Compile, and Run
 ```
-docker exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'npm install && tsc && node dist/index.js'
+docker exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'npm install'
+docker exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'tsc && node dist/index.js'
 ```
 
+Install, Compile, and Run
 #### Podman
 ```
-podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'npm install && tsc && node dist/index.js'
+podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'npm install'
+podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'tsc && node dist/index.js'
 ```
