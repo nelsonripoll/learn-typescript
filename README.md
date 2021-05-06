@@ -12,7 +12,7 @@ ISBN-13 (electronic): 978-1-4842-4979-6
 
 ```
 docker build -t learn-typescript .
-docker run -dt --name learn-typescript localhost/learn-typescript
+docker run -dt --name learn-typescript learn-typescript
 ```
 
 ### Buildah / Podman
