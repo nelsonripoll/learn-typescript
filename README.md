@@ -1,11 +1,4 @@
-# Learning Typescript
-
-Examples and notes from this project are taken from the following sources:
-
-*Essential TypeScript: From Beginner to Pro*
-ISBN-13 (electronic): 978-1-4842-4979-6
-
-## Understanding TypeScript
+# Getting Started with TypeScript
 
 TypeScript is a superset of the JavaScript language that focuses on producing safe and predictable code that can be executed
  by any JavaScript runtime. TypeScript's headline features are focused on developer productivity through the use of static 
@@ -17,7 +10,12 @@ The TypeScript package includes a compiler that processes TypeScript files and p
  additional checks during compilation. TypeScript enhances JavaScript, but the result is still JavaScript, and development
  in a TypeScript project is largely a process of writing JavaScript code.
 
-### JavaScript Primer
+Examples and notes from this project are taken from the following sources:
+
+*Essential TypeScript: From Beginner to Pro*
+ISBN-13 (electronic): 978-1-4842-4979-6
+
+## JavaScript Primer
 
 The building blocks for JavaScript code are statements, which are executed in the order they are defined. The *let* keyword
  is used to define variables (as opposed to the *const* keyword, which defines constant values) followed by a name. The value
@@ -27,7 +25,7 @@ JavaScript provides some build-in objects to perform common tasks, such as writi
  *console.log* method. Strings can be defined as literal values, using single or double quotes, or as template strings, using
  backtick characters and inserting expressions into the template using the dollar sign and braces.
 
-#### Understanding JavaScript Types
+### Understanding JavaScript Types
 
 The foundation for the JavaScript language language is a set of built-in types:
 
@@ -128,9 +126,382 @@ Prices are different
 Total Price: 200
 ```
 
-### Using the TypeScript Compiler
+Type coercion can be useful if applied explicitly. When using a logical AND/OR operator, values are coerced into booleans. If the value
+ is *0*, *null*, or *undefined*, they are coerced into *false* values. This method can be used as a way to provide fallback values.
 
-### Testing and Debugging TypeScript
+**code:**
+```
+let firstCity;
+let secondCity = firstCity || "San Antonio";
+let thirdCity = 0 || "Austin";
+console.log(`First City: ${ firstCity }`);
+console.log(`Second City: ${ secondCity }`);
+console.log(`Third City: ${ thirdCity }`);
+```
+
+**results:**
+```
+undefined
+San Antonio
+Austin
+```
+
+One thing to note is a numeric *0* will be coerced to *false* while a string *"0"* will be coerced to true.
+
+**code:**
+```
+let numeric0 = 0;
+let string0 = "0";
+let results = numeric0 || string0 || "fallback";
+
+console.log(`Results: ${results}`)
+console.log(`Type of results: ${typeof results}`);
+```
+
+**results:**
+```
+0
+Type of results: string
+```
+
+The fluid approach that JavaScript takes to types is followed through in other parts of the language, including functions. The types
+ of a function's parameters are determined by the values that are used to invoke it. JavaScript doesn't enforce a match between the
+ number of parameters defined and the number of arguments used to invoke it. Any parameter for which a value is not provided will be
+ *undefined*. Using the plus operator, if one value is a string all values are converted into strings, even *undefined*, and thus will
+ be concatenated together. If all values are numbers, the sum of all values will be returned. If *undefined* is being used in addition
+ with another number, JavaScript coalesces *undefined* to a special number value *NaN* (Not a Number). The result of addition that
+ includes *NaN* will be *NaN*, which means the type of the result is a number but the value isn't useful and is unlikely to be what
+ was intended.
+
+**code:**
+```
+let hatPrice = 100;
+console.log(`Hat price: ${hatPrice}`);
+
+let bootsPrice = "100";
+console.log(`Boots price: ${bootsPrice}`);
+
+function sumPrices(first, second, third) {
+  return first + second + third;
+}
+
+let totalPrice = sumPrices(hatPrice, bootsPrice);
+console.log(`Total: ${totalPrice}`);
+
+totalPrice = sumPrices(100, 200, 300);
+console.log(`Total: ${totalPrice} ${typeof totalPrice}`);
+
+totalPrice = sumPrices(100, 200);
+console.log(`Total: ${totalPrice} ${typeof totalPrice}`);
+```
+
+**results:**
+```
+Hat price: 100
+Boots price: 100
+Total: 100100undefined
+Total: 600 number
+Total: NaN number
+```
+
+One way to avoid argument mismatch is to use a default parameter value.
+
+**code:**
+```
+function sumPrices(first, second, third = 0) {
+  return first + second + third;
+}
+
+let totalPrice = sumPrices(hatPrice, bootsPrice);
+console.log(`Total: ${totalPrice}`);
+
+totalPrice = sumPrices(100, 200, 300);
+console.log(`Total: ${totalPrice} ${typeof totalPrice}`);
+
+totalPrice = sumPrices(100, 200);
+console.log(`Total: ${totalPrice} ${typeof totalPrice}`);
+```
+
+**results:**
+```
+Total: 1001000 string
+Total: 600 number
+Total: 300 number
+```
+
+A more flexible approach is a rest parameter, which is prefixed with three periods (...) and must be the last parameter
+ defined by the function. A reset parameter is an array containing all the arguments for which parameters are not defined.
+ To ensure the function produces a useful sum of its parameter values, however they are received, they can be converted
+ to numbers and filtered to remove any that are *NaN*.
+
+**code:**
+```
+function sumPrices(...numbers) {
+  let reducer = function (accumulator, currentValue) => {
+    currentValue = (Number.isNaN(Number(currentValue)) ? 0 : Number(currentValue));
+    return accumulator + currentValue;
+  }
+  let initialValue = 0;
+  
+  return numbers.reduce(reducer, initialValue);
+}
+
+let totalPrice = sumPrices(hatPrice, bootsPrice);
+console.log(`Total: ${totalPrice}`);
+
+totalPrice = sumPrices(100, 200, 300);
+console.log(`Total: ${totalPrice} ${typeof totalPrice}`);
+
+totalPrice = sumPrices(100, 200);
+console.log(`Total: ${totalPrice} ${typeof totalPrice}`);
+```
+
+**results:**
+```
+Total: 100100 string
+Total: 600 number
+Total: 300 number
+```
+
+### Working with Arrays
+
+JavaScript arrays can be dynamically resized and can contain any combination of values and types. The size of an array is 
+ not specified when it is created and will be allocated automatically as items are added or removed. JavaScript arrays are 
+ zero-based and are defined using square brackets, optionally with the initial contents separated by commas.
+
+**useful array methods**
+| Method                | Description                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------- |
+| concat(otherArray)    | returns a new array that concatenates the array the method was called on with the array in the argument |
+| join(separator)       | joins all elements in the array to form a string using the argument as a delimiter                      |
+| pop()                 | removes and returns the last item in the array                                                          |
+| shift()               | removes and returns the first element in the array                                                      |
+| push(item)            | appends the specified item to the end of the array                                                      |
+| unshift(item)         | inserts a new item at the start of the array                                                            |
+| reverse()             | returns a new array that contains the items in reverse order                                            |
+| slice(start, end)     | returns a section of the array                                                                          |
+| sort()                | sorts the array                                                                                         |
+| splice(index, count)  | removes count items from the array, starting at the specified index                                     |
+| every(test)           | calls the test function for each item and returns true if the function returns true for all items       |
+| some(test)            | method returns true if calling the test function for each item returns true at least once               |
+| filter(test)          | method returns a new array containing the items for which the test function returns true                |
+| find(test)            | returns the first item for which the test function returns true                                         |
+| findIndex(test)       | returns the index of the first item for which the test function returns true                            |
+| forEach(callback)     | invokes the callback function for each item in the array                                                |
+| includes(value)       | returns true if the array contains the specified value                                                  |
+| map(callback)         | returns a new array containing the result of invoking the callback function for each item               |
+| reduce(callback)      | returns the accumulated value produced by invoking the callback function for each item                  |
+
+The spread operator can be used to expand the contents of an array so that its elements can be used as arguments to a function. It
+ can also be used to expand the contents of an array for easy concatenation.
+
+**code:**
+```
+let sumPrices = (...numbers) => numbers.reduce((accumulator, currentValue) => accumulator + (Number.isNaN(Number(currentValue)) ? 0 : Number(currentValue)));
+
+let names = ["Hats", "Boots", "Gloves"];
+console.log(names);
+console.log(...names);
+
+let prices = [100, 200, 300];
+console.log(prices);
+console.log(...prices);
+
+console.log(`First Item: ${names[0]}: ${prices[0]}`);
+
+let totalPrice = sumPrices(..prices);
+console.log(`Total: ${totalPrice}`);
+
+let combinedArray = [...names, ...prices];
+console.log(combinedArray);
+console.log(...combinedArray);
+
+[ 'Hats', 'Boots', 'Gloves', 100, 200, 300 ]
+Hats Boots Gloves 100 200 300
+```
+
+**results:**
+```
+[ 'Hats', 'Boots', 'Gloves' ]
+Hats Boots Gloves
+[ 100, 200, 300 ]
+100 200 300
+First Item: Hats 100
+Total: 600
+```
+
+### Working with Objects
+
+JavaScript objects are collections of properties, each of which has a name and a value. The simplest way to define an object is to use
+ the literal syntax. The literal syntax uses braces to contain a list of property names and values. Names are separated from their values
+ with colons and from other properties with commas. Like the rest of JavaScript, objects are dynamic. Properties can be added and removed, 
+ and values of any type can be assigned to properties.
+
+**code:**
+```
+let hat = {
+  name: "Hat",
+  price: 100
+}
+console.log(hat);
+
+
+let boots = {
+  name: "Boots",
+  price: "100"
+}
+console.log(boots);
+
+let totalPrice = Number(hat.price) + Number(boots.price);
+console.log(`Total: ${totalPrice}`);
+
+let gloves = {
+  productName: "Gloves", 
+  price: "40"
+}
+console.log(gloves);
+
+gloves.name = gloves.productName;
+delete gloves.productName;
+gloves.price = 20;
+console.log(gloves);
+
+let propertyCheck = hat.price || 0;
+let objectAndPropertyCheck = (hat || {}).price || 0; 
+console.log(`Checks: ${propertyCheck}, ${objectAndPropertyCheck}`);
+```
+
+**results:**
+```
+{ name: 'Hat', price: 100 }
+{ name: 'Boots', price: '100' }
+200
+{ productName: 'Gloves', price: '40' }
+{ name: 'Gloves', price: '20' }
+Checks: 100, 100
+```
+
+The spread operator can be used to expand the properties and values defined by an object, which makes 
+ it easy to create one object based on the properties defined by another. The spread operator can also
+ be combined with other properties to add, replace, or absorb properties from the source object.
+
+**code:**
+```
+let hat = {
+  name: "Hat",
+  price: 100 
+};
+
+let boots = {
+  name: "Boots",
+  price: "100"
+}
+
+let otherHat = { ...hat };
+console.log(`Spread: ${JSON.stringify(otherHat)}`);
+
+let additionalProperties = { ...hat, discounted: true}; 
+console.log(`Additional: ${JSON.stringify(additionalProperties)}`);
+
+let replacedProperties = { ...hat, price: 10}; 
+console.log(`Replaced: ${JSON.stringify(replacedProperties)}`);
+
+let { price , ...someProperties } = hat; 
+console.log(`Selected: ${JSON.stringify(someProperties)}`);
+```
+
+**results:**
+```
+Spread: {"name":"Hat","price":100}
+Additional: {"name":"Hat","price":100,"discounted":true} 
+Replaced: {"name":"Hat","price":10}
+Selected: {"name":"Hat"}
+```
+
+Getters and setters are functions that are invoked when a property value is read or assigned.
+
+**code:**
+```
+let hat = {
+  name: "Hat",
+  _price: 100, 
+  priceIncTax: 100 * 1.2,
+
+  set price(newPrice) {
+    this._price = newPrice; this.priceIncTax = this._price * 1.2;
+  },
+
+  get price() {
+    return this._price;
+  }
+};
+
+let boots = { 
+  name: "Boots",
+  price: "100",
+
+  get priceIncTax() {
+    return Number(this.price) * 1.2;
+  }
+}
+
+console.log(`Hat: ${hat.price}, ${hat.priceIncTax}`); 
+hat.price = 120;
+console.log(`Hat: ${hat.price}, ${hat.priceIncTax}`);
+
+console.log(`Boots: ${boots.price}, ${boots.priceIncTax}`); 
+boots.price = "120";
+console.log(`Boots: ${boots.price}, ${boots.priceIncTax}`);
+```
+
+**results:**
+```
+Hat: 100, 120
+Hat: 120, 144
+Boots: 100, 120
+Boots: 120, 144
+```
+
+### Understanding JavaScript Object Inheritance
+
+### Using Iterators and Generators
+
+### Using JavaScript Collections
+
+### Using Modules
+
+
+
+## Using the TypeScript Compiler
+
+### Understanding the Project Structure
+
+### Using the Node Package Manager
+
+### Understanding the TypeScript Compiler Configuration File
+
+### Compiling TypeScript Code
+
+### Using the Version Targeting Feature
+
+### Selecting a Module Format
+
+### Useful Compiler Configuration Settings
+
+
+
+## Testing and Debugging TypeScript
+
+### Debugging TypeScript Code
+
+### Using the TypeScript Linter
+
+### Unit Testing TypeScript
+
+
+
+
+# Running Projects
 
 ## Build and Run Container
 
@@ -148,11 +519,9 @@ buildah bud -f Dockerfile -t learn-typescript
 podman run -dt -v $(pwd)/todo:/usr/src --name learn-typescript localhost/learn-typescript
 ```
 
-## Running Projects
+## ToDo
 
-### ToDo
-
-#### Docker
+### Docker
 
 Install, Compile, and Run
 ```
@@ -161,15 +530,15 @@ docker exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/ba
 ```
 
 Install, Compile, and Run
-#### Podman
+### Podman
 ```
 podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'npm install'
 podman exec --interactive --tty --workdir /usr/src/todo learn-typescript /bin/bash -c 'tsc && node dist/index.js'
 ```
 
-### Primer
+## Primer
 
-#### Docker
+### Docker
 
 Install, Compile, and Run
 ```
