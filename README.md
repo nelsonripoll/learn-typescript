@@ -531,6 +531,12 @@ JavaScript objects have a link to another object, known as the *prototype*, from
  assigned to existing properties. Because objects maintain a link to their prototype, changing the value of one
  could change it for other objects.
 
+| Name                | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| getPrototypeOf      | returns an object's prototype                   |
+| setPrototypeOf      | changes the prototype of an object              |
+| getOwnPropertyNames | returns the names of an object's own properties |
+
 **code:**
 ```
 let hat = { 
@@ -580,6 +586,68 @@ toString: [object Object]
 toString: Name: Hat, Price: 100
 toString: Name: Boots, Price: 100
 ```
+
+Changes to *Object* should be made cautiosly because they affect all the other objects in the application. A
+ better approach is to create a prototype specifically for the use of your application. Prototypes can be
+ defined just like any other object. The effect is a chain of prototypes that the JavaScript works its way
+ along until it locates a property or method or reaches the end of the chain.
+
+**code:**
+```
+let ProductProto = {
+  toString: function() {
+    return `toString: Name: ${this.name}, Price: ${this.price}`; 
+  }
+}
+
+let hat = { 
+  name: "Hat",
+  price: 100,
+  
+  getPriceIncTax() {
+    return Number(this.price) * 1.2; 
+  }
+}
+
+let boots = { 
+  name: "Boots",
+  price: 100,
+  
+  getPriceIncTax() {
+    return Number(this.price) * 1.2; 
+  }
+}
+
+let gloves = {
+  name: "Gloves",
+  price: 100,
+  
+  getPriceIncTax() {
+    return Number(this.price) * 1.2; 
+  }
+}
+
+Object.setPrototypeOf(hat, ProductProto);
+Object.setPrototypeOf(boots, ProductProto);
+
+console.log(hat.toString()); 
+console.log(boots.toString());
+console.log(gloves.toString());
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100
+toString: Name: Boots, Price: 100
+toString: [object Object]
+```
+
+A constructor function is used to create a new object, configure its properties, and assign its prototype,
+ all of which is done in a single step with the *new* keyword. Constructor functions can be used to ensure
+ that objects are created consistently and that the correct prototype is applied. Constructor functions
+ are invoked with the *new* keyword, followed by the function or its variable name and the arguments that
+ will be used to configure the object. The JavaScript runtime creates a new object and uses it as the *this*
+ value to invoke the constructor function, providing the argument values as parameters.
 
 ### Using Iterators and Generators
 
