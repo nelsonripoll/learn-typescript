@@ -462,7 +462,124 @@ Boots: 100, 120
 Boots: 120, 144
 ```
 
+Objects can have methods as properties as well. All the features and behaviors that functions provide, such as default
+ and rest parameters, can be used for methods. The *function* keyword and colon that separates a property name from its
+ value are omitted, allowing methods to be defined in a style that manay develoeprs find natural.
+
+**code:**
+```
+let hat = { 
+  name: "Hat",
+  _price: 100, 
+  priceIncTax: 100 * 1.2,
+
+  set price(newPrice) {
+    this._price = newPrice; this.priceIncTax = this._price * 1.2;
+  },
+
+  get price() {
+    return this._price;
+  },
+
+  writeDetails: function() {
+    console.log(`${this.name}: ${this.price}, ${this.priceIncTax}`);
+  }
+};
+
+hat.writeDetails(); 
+hat.price = 120; 
+hat.writeDetails();
+```
+
+**results:**
+```
+Hat: 100, 120
+Hat: 120, 144
+```
+
+## Understanding the this Keyword
+
+The *this* keyword can be used in any function, even when that function isn't used as a method. JavaScript
+ defines a global object, which can be assigned values that are available throughout an application. The
+ global object is used to provide access to the essential features in the execution environment, such  as 
+ the *document* object in browsers that allows interaction with the Document Object Model API. Values 
+ assigned names without using *let*, *const*, or *var* keyword are assigned to the global object.
+ 
+Functions are objects, which means they define methods, including the *call* method. It is this method that
+ is used to invoke a function behind the scenes. The first argument to the *call* method is the value for
+ *this*, which is set to the global object. The name of the global object changes based on the execution
+ environment. In code executed by Node.js, *global* is used, but *window* or *self* will be required in
+ browsers.
+
+When a function is invoked as an object's method, *this* is set to the object. *this* is set differently if
+ the function is accessed outside of its object, which can happen if the function is assigned to a variable.
+ Functions can be used like any other value, including assigning them to variables outside of the object in
+ which they were defined. If the function is invoked through the variable, then *this* will be set to the
+ global object. Arrow functions don't have their own *this* value and inherit the closest value of *this* 
+ they can find when they are executed.
+
 ### Understanding JavaScript Object Inheritance
+
+JavaScript objects have a link to another object, known as the *prototype*, from which they inherit properties
+ and methods. Since prototypes are objects and have their own prototype, objects form an inheritance chain that
+ allows complex features to be defined once and used consistently. When an object is created using the literal
+ syntax, its prototype is *Object*, which is a built-in object provided by JavaScript. *Object* provides some
+ basic features that all objects inherit. One feature includes a method name *toString* that returns a string
+ representation of an object. Object is the prototype for most objects, but it also provides some methods that
+ are used directly, rather than through inheritance, and which can be used to get information about prototypes.
+ Prototypes are regular JavaScript objects, new properties can be defined on prototypes, and new values can be
+ assigned to existing properties. Because objects maintain a link to their prototype, changing the value of one
+ could change it for other objects.
+
+**code:**
+```
+let hat = { 
+  name: "Hat",
+  price: 100,
+  
+  getPriceIncTax() {
+    return Number(this.price) * 1.2; 
+  }
+};
+
+let boots = { 
+  name: "Boots",
+  price: 100,
+  
+  getPriceIncTax() {
+    return Number(this.price) * 1.2; 
+  }
+}
+
+let hatPrototype = Object.getPrototypeOf(hat); 
+console.log(`Hat Prototype: ${hatPrototype}`);
+
+let bootsPrototype = Object.getPrototypeOf(boots); 
+console.log(`Boots Prototype: ${bootsPrototype}`);
+
+console.log(`Common prototype: ${ hatPrototype === bootsPrototype}`);
+
+console.log(`Hat: ${hat.price}, ${hat.getPriceIncTax() }`);
+console.log(`toString: ${hat.toString()}`);
+
+hatPrototype.toString = function() {
+  return `toString: Name: ${this.name}, Price: ${this.price}`;
+}
+
+console.log(hat.toString()); 
+console.log(boots.toString());
+```
+
+**results:**
+```
+Hat Prototype: [object Object] 
+Boots Prototype: [object Object] 
+Common prototype: true
+Hat: 100, 120
+toString: [object Object]
+toString: Name: Hat, Price: 100
+toString: Name: Boots, Price: 100
+```
 
 ### Using Iterators and Generators
 
