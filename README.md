@@ -647,9 +647,250 @@ A constructor function is used to create a new object, configure its properties,
  that objects are created consistently and that the correct prototype is applied. Constructor functions
  are invoked with the *new* keyword, followed by the function or its variable name and the arguments that
  will be used to configure the object. The JavaScript runtime creates a new object and uses it as the *this*
- value to invoke the constructor function, providing the argument values as parameters.
+ value to invoke the constructor function, providing the argument values as parameters. The prototype for 
+ the new object is set to the object returned by the *prototype* property of the constructor function.
+
+**code:**
+```
+let Product = function(name, price) { 
+  this.name = name;
+  this.price = price;
+}
+
+Product.prototype.toString = function() {
+  return `toString: Name: ${this.name}, Price: ${this.price}`;
+}
+
+let TaxedProduct = function(name, price, taxRate) { 
+  Product.call(this, name, price);
+  this.taxRate = taxRate;
+}
+
+Object.setPrototypeOf(TaxedProduct.prototype, Product.prototype);
+
+TaxedProduct.prototype.getPriceIncTax = function() { 
+  return Number(this.price) * Number(this.taxRate);
+}
+
+TaxedProduct.prototype.toString = function() {
+  let chainResult = Product.prototype.toString.call(this);
+  return `${chainResult}, Tax: ${this.getPriceIncTax()}`;
+}
+
+hat = new TaxedProduct("Hat", 100, 1.2);
+boots = new Product("Boots", 100);
+
+console.log(hat.toString());
+console.log(boots.toString());
+
+console.log(`hat and Product: ${ hat instanceof Product}`); 
+console.log(`boots and Product: ${ boots instanceof Product}`);
+
+console.log(`hat and TaxedProduct: ${ hat instanceof TaxedProduct}`);
+console.log(`boots and TaxedProduct: ${ boots instanceof TaxedProduct}`);
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100, Tax: 120
+toString: Name: Boots, Price: 100
+hat and Product: true
+boots and Product: true
+hat and TaxedProduct: true
+boots and TaxedProduct: false
+```
+
+Properties and methods that are defined on the constructor function are often referred to as *static*, meaning
+ they are accessed through the constructor and not individual objects created by that constructor (as opposed
+ to *instance properties*, which are accessed through an object). The *Object.setPrototypeOf* and *Object.getPrototypeOf*
+ methods are good examples of *static* methods.
+
+**code:**
+```
+let Product = function(name, price) { 
+  this.name = name;
+  this.price = price;
+}
+
+Product.prototype.toString = function() {
+  return `toString: Name: ${this.name}, Price: ${this.price}`;
+}
+
+Product.process = (...products) => products.forEach(p => console.log(p.toString()));
+Product.process(new Product("Hat", 100, 1.2), new Product("Boots", 100));
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100
+toString: Name: Boots, Price: 100
+```
+
+JavaScript classes are implemented using prototypes. Classes are defined with the *class* keyword, followed by a name
+ for the class. The class syntax may appear more familiar, but classes are translated into the underlying JavaScript
+ prototype system. Objects are created from classes using the *new* keyword. The JavaScript runtime creats a new object
+ and invokes the class *constructor* function, which receives the new object through the *this* value and which is
+ responsible for defining the object's own properties.
+
+Classes can inherit features using the *extends* keyword and invoke the superclass constructor and methods using the
+ *super* keyword. A class declares its superclass using the *extends* keyword. The *super* keyword is used in the
+ constructor to invoke the superclass constructor, which is equivalent to chaining constructor functions. The *super*
+ keyword must be used before the *this* keyword and is generally used in the first statement in the constructor. The
+ *super* keyword can also be used to access superclass properties and methods. The *static* keyword is applied to
+ create static methods that are accessed through the class, rather than the object it creates.
+
+**code:**
+```
+class Product {
+  constructor(name, price) {
+    this.name = name;
+    this.price = price; 
+  }
+  
+  toString() {
+    return `toString: Name: ${this.name}, Price: ${this.price}`;
+  }
+}
+
+class TaxedProduct extends Product {
+  constructor(name, price, taxRate = 1.2) { 
+    super(name, price);
+    this.taxRate = taxRate;
+  }
+
+  getPriceIncTax() {
+    return Number(this.price) * this.taxRate;
+  }
+
+  toString() {
+    let chainResult = super.toString();
+    return `${chainResult}, Tax: ${this.getPriceIncTax()}`;
+  }
+
+  static process(..products) {
+    products.forEach(p => console.log(p.toString()));
+  }
+}
+
+let hat = new TaxedProduct("Hat", 100);
+let boots = new TaxedProduct("Boots", 100, 1.3);
+
+console.log(hat.toString()); 
+console.log(boots.toString());
+
+TaxedProduct.process(new TaxedProduct("Hat", 100, 1.2), new TaxedProduct("Boots", 100));
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100, Tax: 120
+toString: Name: Boots, Price: 100, Tax: 130
+toString: Name: Hat, Price: 100, Tax: 120
+toString: Name: Boots, Price: 100, Tax: 120
+```
 
 ### Using Iterators and Generators
+
+Iterators are objects that return a sequence of values. Iterators are used with the or can be useful in 
+ their own right. An iterator defines a function named *next* that returns an object with *value* and *done* 
+ properties: the *value* property returns the next value in the sequence, and the *done* property is set to 
+ *true* when the sequence is complete.
+
+**code:**
+```
+class Product {
+  constructor(name, price) {
+    this.name = name;
+    this.price = price; 
+  }
+  
+  toString() {
+    return `toString: Name: ${this.name}, Price: ${this.price}`;
+  } 
+}
+
+function createProductIterator() {
+  const hat = new Product("Hat", 100);
+  const boots = new Product("Boots", 100); 
+  const umbrella = new Product("Umbrella", 23);
+
+  let lastVal;
+
+  return {
+    next() {
+      switch (lastVal) {
+        case undefined:
+          lastVal = hat;
+          return { value: hat, done: false };
+        case hat:
+          lastVal = boots;
+          return { value: boots, done: false };
+        case boots:
+          lastVal = umbrella;
+          return { value: umbrella, done: false };
+        case umbrella:
+          return { value: undefined, done: true };
+      } 
+    }
+  } 
+}
+
+
+let iterator = createProductIterator(); 
+let result = iterator.next();
+
+while (!result.done) {
+  console.log(result.value.toString());
+  result = iterator.next(); 
+}
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100
+toString: Name: Boots, Price: 100
+toString: Name: Umbrella, Price: 23
+```
+
+Iterators has to maintain state data to keep track of the current position in the sequence each
+ time the next function is invoked. A simpler approach is to use a generator, which is a function
+ that is invoked once and uses the *yield* keyword to produce the values in the sequence. Generator
+ functions are denoted with an asterisk. Generators are consumed in the same way as iterators. The 
+ JavaScript runtime creates the *next* function and executes the generator function until it reaches 
+ the *yield* keyword, which provides a value in the sequence. Execution of the generator function 
+ continues gradually each time the *next* function is invoked. When there are no more *yield* 
+ statements to execute, an object whose *done* property is set to *true* is created automatically.
+ Generators can be used with the spread operator, allowing the sequence to be used as a set of
+ function parameters or to populate an array.
+
+**code:**
+```
+class Product {
+  constructor(name, price) {
+    this.name = name;
+    this.price = price; 
+  }
+
+  toString() {
+    return `toString: Name: ${this.name}, Price: ${this.price}`;
+  } 
+}
+
+function* createProductIterator() { 
+  yield new Product("Hat", 100); 
+  yield new Product("Boots", 100); 
+  yield new Product("Umbrella", 23);
+}
+
+[...createProductIterator()].forEach(p => console.log(p.toString()));
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100
+toString: Name: Boots, Price: 100
+toString: Name: Umbrella, Price: 23
+```
 
 ### Using JavaScript Collections
 
