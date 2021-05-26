@@ -892,11 +892,283 @@ toString: Name: Boots, Price: 100
 toString: Name: Umbrella, Price: 23
 ```
 
+Stand-alone functions are iterators and generators can be useful, but the most common requirement is for an object
+ to provide a sequence as part of some broader function functionality. The *Symbol.iterator* property is used to
+ denote the default iterator for an object and allows the object to be iterated directly. The *yield\** expression 
+ iterates over the operand and yields each value returned by it.
+
+**code:**
+```
+class Product {
+  constructor(name, price) {
+    this.name = name;
+    this.price = price; 
+  }
+
+  toString() {
+    return `toString: Name: ${this.name}, Price: ${this.price}`;
+  }
+}
+
+class GiftPack {
+  constructor(name, ...products) {
+    this.name = name; 
+    this.products = products;
+  }
+
+  *[Symbol.iterator]() {
+    yield* this.products;
+  }
+
+  getTotalPrice() {
+    return this.products.reduce((total, p) => total + p.price, 0);
+  }
+}
+
+let hat = new Product("Hat", 100);
+let boots = new Product("Boots", 80);
+let gloves = new Product("Gloves", 23);
+
+let winter = new GiftPack("winter", hat, boots, gloves);
+
+console.log(`Total price: ${ winter.getTotalPrice() }`);
+
+[...winter].forEach((p) => { console.log(`Product: ${p}`) });
+```
+
+**results:**
+```
+Product: toString: Name: Hat, Price: 100
+Product: toString: Name: Boots, Price: 100
+Product: toString: Name: Umbrella, Price: 23
+```
+
 ### Using JavaScript Collections
+
+JavaScript provides dedicated collection objects. Objects can be used as collections, where each property is a key/value
+ pair, with the property name being the key. Object provides useful methods for getting the set of keys or values from an
+ object.
+
+| Name                  | Description                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| Object.keys(object)   | Returns an array containing the property names defined by the object  |
+| Object.values(object) | Returns an array containing the property values defined by the object |
+
+**code:**
+```
+class Product {
+  constructor (name, price) {
+    this.name = name;
+    this.price = price;
+  }
+
+  toString() {
+    return `toString: Name: ${this.name}, Price: ${this.price}`;
+  }
+}
+
+let data = {
+  hat: new Product("Hat", 100)
+}
+
+data.boots = new Product("Boots", 100);
+
+Object.keys(data).forEach(key => console.log(data[key].toString()));
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100
+toString: Name: Boots, Price: 100
+```
+
+JavaScript also provides *Map*, which is purpose-build for storing data using keys of any type. The API
+ provided by *Map* allows items to be stored and retrieved, and iterators are available for the keys
+ and values.
+
+| Name            | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| set(key, value) | stores a value with the specified key                    |
+| get(key)        | retrieves the value stored with the specified key        |
+| keys()          | returns an iterator for the keys in the *Map*            |
+| values()        | returns an iterator for the values in the *Map*          |
+| entries()       | returns an iterator for the key/value pairs in the *Map* |
+
+**code:**
+```
+class Product {
+  constructor (name, price) {
+    this.name = name;
+    this.price = price;
+  }
+
+  toString() {
+    return `toString: Name: ${this.name}, Price: ${this.price}`;
+  }
+}
+
+let data = new Map();
+data.set("hat", new Product("Hat", 100));
+data.set("boots", new Product("Boots", 100));
+
+[...data.keys()].forEach(key => console.log(data.get(key).toString()));
+```
+
+**results:**
+```
+toString: Name: Hat, Price: 100
+toString: Name: Boots, Price: 100
+```
+
+The main advantage of using a *Map* is that any value can be used as a key, including *Symbol* values. Each
+ *Symbol* value is unique and immutable and ideally suited as an identifier for objects.
+
+**code:**
+```
+class Product {
+  constructor(name, price) {
+    this.id = Symbol();
+    this.name = name;
+    this.price = price;
+  }
+}
+
+class Supplier {
+  constructor(name, productids) {
+    this.name = name;
+    this.productids = productids;
+  }
+}
+
+let acmeProducts = [new Product("Hat", 100), new Product("Boots", 100)];
+let zoomProducts = [new Product("Hat", 100), new Product("Boots", 100)];
+
+let products = new Map();
+
+[...acmeProducts, ...zoomProducts].forEach(p => products.set(p.id, p));
+
+let suppliers = new Map();
+
+suppliers.set("acme", new Supplier("Acme Co", acmeProducts.map(p => p.id)));
+suppliers.set("zoom", new Supplier("Zoom Shoes", zoomProducts.map(p => p.id)));
+
+suppliers.get("acme").productids.forEach(id => console.log(`Name: ${products.get(id).name}`));
+```
+
+**results:**
+```
+Name: Hat
+Name: Boots
+```
+
+JavaScript also provides *Set*, which stores data by index and stores only unique values. The need to
+ allow or prevent duplicate values is the reason to choose between an array and a *Set*.
+
+| Name              | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| add(value)        | adds the value to the *Set*                    |
+| entries()         | returns an iterator for the items in the *Set* |
+| has(value)        | returns *true* if the *Set* contains the value |
+| forEach(callback) | invokes a function for each value in the *Set* |
+
+**code:**
+```
+class Product {
+  constructor(name, price) {
+    this.id = Symbol(); 
+    this.name = name; 
+    this.price = price;
+  }
+}
+
+let product = new Product("Hat", 100);
+let productArray = [];
+let productSet = new Set();
+
+for (let i = 0; i < 5; i++) { 
+  productArray.push(product); 
+  productSet.add(product);
+}
+
+console.log(`Array length: ${productArray.length}`);
+console.log(`Set size: ${productSet.size}`);
+```
+
+**results:**
+```
+Array length: 5
+Set size: 1
+```
 
 ### Using Modules
 
+Each JavaScript module is contained in its own JavaScript file. The *export* keyword is used to
+ denote the features that will be available outside the module. By default, the contents of the 
+ JavaScript file are private and must be explicitly shared using the *export* keyword before they
+ can be used in the rest of the application. The *default* keyword is used when the module contains
+ a single feature.
 
+The *import* keyword is required to declare a dependency on the module. It is followed by an identifier,
+ which is the name by which the features in the module will be known when it is used. The *from* keyword
+ follows the identifier, which is then followed by the location of the module. During the build process,
+ the JavaScript runtime will detect the *import* statement and will load the contents of the module.
+
+**module:**
+```
+export default function(price) { 
+  return Number(price) * 1.2;
+}
+```
+
+**code:**
+```
+import calcTax from "./module/tax";
+
+class Product {
+  constructor(name, price) {
+    this.id = Symbol(); this.name = name; this.price = price;
+  } 
+}
+
+let product = new Product("Hat", 100);
+let taxedPrice = calcTax(product.price);
+
+console.log(`Name: ${ product.name }, Taxed Price: ${taxedPrice}`);
+```
+
+**results:**
+```
+Name: Hat, Taxed Price: 120
+```
+
+A module can assign names to the features it exports. A module can export default and named features.
+ This is a common pattern with frameworks where the core features are provided by the default export
+ of a module and optional features are available as named exports.
+
+**module:**
+```
+export function calculateTax(price) {
+  return Number(price) * 1.2;
+}
+
+export default function calcTaxandSum(...prices) {
+  return prices.reduce((total, p) => total += calculateTax(p), 0);
+}
+```
+
+**code:**
+```
+import calcTaxAndSum, { calculateTax } from "./modules/tax";
+
+console.log(`Calculate Tax: ${calculateTax(100)}`);
+console.log(`Calculate Tax and Sum: ${calculateTaxAndSum(100, 200)}`);
+```
+
+**results:**
+```
+Calculate Tax: 120
+Calculate Tax And Sum: 360
+```
 
 ## Using the TypeScript Compiler
 
