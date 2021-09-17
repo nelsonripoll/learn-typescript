@@ -64,28 +64,124 @@ For each package, the *package.json* file includes details of the version number
 
 All NPM commands should be run inside the project folder, which is the one that contains the *package.json* file.
 
-| Command                                | Description                                                                                                                                         |
-| -------------------------------------  | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| npm install                            | performs a local install of the packages specified in the *package.json* file                                                                       |
-| npm install package@version            | performs a local install of a specific version of a package and updates the *package.json* file to add the package to the *dependencies* section    |
+| Command | Description |
+| ------- | ----------- |
+| npm install | performs a local install of the packages specified in the *package.json* file |
+| npm install package@version | performs a local install of a specific version of a package and updates the *package.json* file to add the package to the *dependencies* section |
 | npm install --save-dev package@version | performs a local install of a specific version of a package and updates the *package.json* file to add the package to the *devDependencies* section |
-| npm install --global package@version   | performa a global install of a spcecific version of a package                                                                                       |
-| npm list                               | list all the local packages and their dependencies                                                                                                  |
-| npm run                                | execute one of the scripts defined in the *package.json* file                                                                                       |
-| npx package                            | runs the code contained in a package                                                                                                                |
-
+| npm install --global package@version | performa a global install of a spcecific version of a package |
+| npm list | list all the local packages and their dependencies |
+| npm run | execute one of the scripts defined in the *package.json* file |
+| npx package | runs the code contained in a package |
 
 ### Understanding the TypeScript Compiler Configuration File
 
+The TypeScript compiler, ```tsc```, is responsible for compiling TypeScript files and implementing its features. The result is pure JavaScript from which the TypeScript keywords and expressions have been removed. A configuration file name ```tsconfig.json``` is used to override the default settings and ensures a consistent configuration.
+
+```
+{
+    "compilerOptions": {
+        "target": "es2018",
+        "outDir": "./dist",
+        "rootDir": "./src"
+    } 
+}
+```
+
+| Name | Description |
+| ---- | ----------- |
+| compilerOptions | This section groups the settings that the compiler will use. |
+| files | This settings specifies the files that will be compiled, which overrides the default behavior where the compiler searches for files to compile. |
+| include | This setting is used to select files for compilation by pattern. If unspecified, files with the .ts, .tsx, and .d.ts extensions will be selected. |
+| exclude | This setting is used to exclude files from compilation by pattern. |
+| compileOnSave | When set to ```true```, this setting is a hint to the code editor that it should run the compiler each time a file is saved. |
+
+You can see the set of files that the compiler has found for compilation by using the ```listFiles``` option. The files displayed by the ```listFiles``` option
+ include the type declarations that the compiler has located. As part of the discovery process, the TypeScript compiler looks for TypeScript files in the location
+ specified by they ```rootDir``` setting in the ```tsconfig.json``` file.
+
+```
+tsc --listFiles
+```
+
 ### Compiling TypeScript Code
 
+The compiler checks the TypeScript code to make sure it confirms to the JavaScript language specification before it tries to enforce features like static types and 
+ emits pure JavaScript code from which the TypeScript additions have been removed. In most respects, the TypeScript compiler works like any compiler. But there is
+ one difference: by default, the compiler continues to emit JavaScript code even when it encounters an error. This behavior can be disabled by setting the
+ ```noEmitOnError``` configuration setting to ```true``` in the ```tsconfig.json``` file. When the compiler runs, output will be generated only when there are no
+ errors detected in the JavaScript code.
+
+ The TypeScript compiler supports watch mode, where it monitors the project and automatically compiles files when a change is detected.
+
+ ```
+ tsc --watch
+ ```
+
+ The compiler's watch mode doesn't automatically execute compiled code. If you are using a web development framework such as React, Angular, or Vue.js, the TypeScript
+  compiler is integrated onto a larger toolchain that will automatically execute the compiled code. The ```ts-watch``` package starts the compiler in watch mode,
+  observes its output, and executes commands based on the compilation results. The ```onsuccess``` argument specifies a command that is executed when compilation
+  succeeds without errors.
+
+```
+npx tsc-watch --onsuccess "node dist/index.js"
+```
+
+The TypeScript compiler doesn't respond to changes on all of its configuration properties, and there will be times when you will need to stop and then start the compiler.
+ A more reliable method is to use the ```scripts``` section of the ```package.json``` file.
+
+```
+{
+"name": "tools",
+"version": "1.0.0",
+"description": "",
+"main": "index.js",
+"scripts": {
+"start": "tsc-watch --onsuccess \"node dist/index.js\""
+},
+"keywords": [],
+"author": "",
+"license": "ISC",
+"devDependencies": {
+"tsc-watch": "^2.1.2",
+"typescript": "^3.5.1"
+}
+}
+```
+
+```
+npm start
+```
+
 ### Using the Version Targeting Feature
+
+The version of the JavaScript language targeted by the compiler is specified by the target setting in the ```tsconfig.json``` file.
+
+```
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "noEmitOnError": true
+    } 
+}
+```
+
+| Name | Description |
+| ---- | ----------- |
+| es3 | Third edition of the language specifiaction that was defined in December 1999. |
+| es5 | Fifth edition of the language specification that was defined in December 2009. |
+| es6 | Sixth edition of the language specification and added features such as classes and modules, arrow functions, and promises. |
+| es2015 | Equivalent to ES6. |
+| es2016 | Seventh edition of the language specification, which introduced the includes method for arrays and an exponentiation operator. |
+| es2017 | Eighth edition of the language specification, which introduced features for inspecting objects and new keywords for asynchronous operations. |
+| es2018 | Ninth edition of the language specification, which introduced the spread and rest operators and improvements for string handling and asynchronous operations. |
+| esNext | Refers to the features that are expected to be included in the next edition of the specification. | 
 
 ### Selecting a Module Format
 
 ### Useful Compiler Configuration Settings
-
-
 
 ## Testing and Debugging TypeScript
 
@@ -95,9 +191,6 @@ All NPM commands should be run inside the project folder, which is the one that 
 
 ### Unit Testing TypeScript
 
-
-
-
 # Running Projects
 
 ## Build and Run Container
@@ -106,7 +199,7 @@ All NPM commands should be run inside the project folder, which is the one that 
 
 ```
 docker build -t learn-typescript .
-docker run -dt -v $(pwd)/todo:/usr/src --name learn-typescript learn-typescript
+docker run -dt -v $(pwd):/usr/src --name learn-typescript learn-typescript
 ```
 
 ### Buildah / Podman
