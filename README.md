@@ -22,14 +22,14 @@ The TypeScript compiler is responsible for transforming TypeScript code into Jav
 
 ### The Project Structure
 
-| Name              | Description                                                                     |
-| ----------------- | ------------------------------------------------------------------------------  |
-| dist              | contains the output from the compiler                                           |
-| node_modules      | contains the packages that the application and development tools require        |
-| src               | contains the source code files that will be compiled by the TypeScript compiler |
-| package.json      | contains the set of top-level package dependencies for the project              |
-| package-lock.json | contains a complete list of the package dependencies for the project            |
-| tsconfig.json     | contains the configuration settings for the TypeScript compiler                 |
+| Name | Description |
+| ---- | ----------- |
+| dist | contains the output from the compiler |
+| node_modules | contains the packages that the application and development tools require |
+| src | contains the source code files that will be compiled by the TypeScript compiler |
+| package.json | contains the set of top-level package dependencies for the project |
+| package-lock.json | contains a complete list of the package dependencies for the project |
+| tsconfig.json | contains the configuration settings for the TypeScript compiler |
 
 ### Using the Node Package Manager
 
@@ -37,14 +37,14 @@ TypeScript and JavaScript development depends on a rich ecosystem of packages. M
  provide the TypeScript compiler; the application framework, if one is used; and the tools required to package the compiled code
  so that it can be distributed and executed.
 
-NPM is used to download these packages and add them to the project's *node_modules* folder. Each package declares a set of dependencies
+NPM is used to download these packages and add them to the project's **node_modules** folder. Each package declares a set of dependencies
  on other packages and specifies the versions that it can work with. NPM follows this chain of dependencies, working out which versions
- of each package is needed and downloads everything that is required. The *package.json* file is used to keep track of the packages
- that have been added using the *npm install* command. The basic content of the file is created by the *npm init* command.
+ of each package is needed and downloads everything that is required. The **package.json** file is used to keep track of the packages
+ that have been added using the **npm install** command. The basic content of the file is created by the **npm init** command.
 
-Packages used during development are installed with the *--save-dev* flag and are recorded in the *devDependencies* section of the 
- *package.json* file. Packages that are included in the application are installed without the *--save-dev* flag and are stored in
- the section named *dependencies*.
+Packages used during development are installed with the **--save-dev** flag and are recorded in the **devDependencies** section of the 
+ **package.json** file. Packages that are included in the application are installed without the **--save-dev** flag and are stored in
+ the section named **dependencies**.
 
 | Name       | Description                                                                                                                                   |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +76,7 @@ All NPM commands should be run inside the project folder, which is the one that 
 
 ### Understanding the TypeScript Compiler Configuration File
 
-The TypeScript compiler, ```tsc```, is responsible for compiling TypeScript files and implementing its features. The result is pure JavaScript from which the TypeScript keywords and expressions have been removed. A configuration file name ```tsconfig.json``` is used to override the default settings and ensures a consistent configuration.
+The TypeScript compiler, **tsc**, is responsible for compiling TypeScript files and implementing its features. The result is pure JavaScript from which the TypeScript keywords and expressions have been removed. A configuration file name **tsconfig.json** is used to override the default settings and ensures a consistent configuration.
 
 ```
 {
@@ -94,11 +94,11 @@ The TypeScript compiler, ```tsc```, is responsible for compiling TypeScript file
 | files | This settings specifies the files that will be compiled, which overrides the default behavior where the compiler searches for files to compile. |
 | include | This setting is used to select files for compilation by pattern. If unspecified, files with the .ts, .tsx, and .d.ts extensions will be selected. |
 | exclude | This setting is used to exclude files from compilation by pattern. |
-| compileOnSave | When set to ```true```, this setting is a hint to the code editor that it should run the compiler each time a file is saved. |
+| compileOnSave | When set to **true**, this setting is a hint to the code editor that it should run the compiler each time a file is saved. |
 
-You can see the set of files that the compiler has found for compilation by using the ```listFiles``` option. The files displayed by the ```listFiles``` option
+You can see the set of files that the compiler has found for compilation by using the **listFiles** option. The files displayed by the **listFiles** option
  include the type declarations that the compiler has located. As part of the discovery process, the TypeScript compiler looks for TypeScript files in the location
- specified by they ```rootDir``` setting in the ```tsconfig.json``` file.
+ specified by they **rootDir** setting in the **tsconfig.json** file.
 
 ```
 tsc --listFiles
@@ -109,7 +109,7 @@ tsc --listFiles
 The compiler checks the TypeScript code to make sure it confirms to the JavaScript language specification before it tries to enforce features like static types and 
  emits pure JavaScript code from which the TypeScript additions have been removed. In most respects, the TypeScript compiler works like any compiler. But there is
  one difference: by default, the compiler continues to emit JavaScript code even when it encounters an error. This behavior can be disabled by setting the
- ```noEmitOnError``` configuration setting to ```true``` in the ```tsconfig.json``` file. When the compiler runs, output will be generated only when there are no
+ **noEmitOnError** configuration setting to **true** in the **tsconfig.json** file. When the compiler runs, output will be generated only when there are no
  errors detected in the JavaScript code.
 
  The TypeScript compiler supports watch mode, where it monitors the project and automatically compiles files when a change is detected.
@@ -119,8 +119,8 @@ The compiler checks the TypeScript code to make sure it confirms to the JavaScri
  ```
 
  The compiler's watch mode doesn't automatically execute compiled code. If you are using a web development framework such as React, Angular, or Vue.js, the TypeScript
-  compiler is integrated onto a larger toolchain that will automatically execute the compiled code. The ```ts-watch``` package starts the compiler in watch mode,
-  observes its output, and executes commands based on the compilation results. The ```onsuccess``` argument specifies a command that is executed when compilation
+  compiler is integrated onto a larger toolchain that will automatically execute the compiled code. The **ts-watch** package starts the compiler in watch mode,
+  observes its output, and executes commands based on the compilation results. The **onsuccess** argument specifies a command that is executed when compilation
   succeeds without errors.
 
 ```
@@ -128,7 +128,7 @@ npx tsc-watch --onsuccess "node dist/index.js"
 ```
 
 The TypeScript compiler doesn't respond to changes on all of its configuration properties, and there will be times when you will need to stop and then start the compiler.
- A more reliable method is to use the ```scripts``` section of the ```package.json``` file.
+ A more reliable method is to use the **scripts** section of the **package.json** file.
 
 ```
 {
@@ -155,15 +155,14 @@ npm start
 
 ### Using the Version Targeting Feature
 
-The version of the JavaScript language targeted by the compiler is specified by the target setting in the ```tsconfig.json``` file.
+The version of the JavaScript language targeted by the compiler is specified by the target setting in the **tsconfig.json** file.
 
 ```
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es2018",
         "outDir": "./dist",
-        "rootDir": "./src",
-        "noEmitOnError": true
+        "rootDir": "./src"
     } 
 }
 ```
@@ -178,6 +177,85 @@ The version of the JavaScript language targeted by the compiler is specified by 
 | es2017 | Eighth edition of the language specification, which introduced features for inspecting objects and new keywords for asynchronous operations. |
 | es2018 | Ninth edition of the language specification, which introduced the spread and rest operators and improvements for string handling and asynchronous operations. |
 | esNext | Refers to the features that are expected to be included in the next edition of the specification. | 
+
+The earlier versions of the ECMAScript standard were given numbers, but recent versions are named for the year in which they were completed. The biggest change happened
+ partway through the definition of ES6/ES2015, which can be regarded as the start of "modern" JavaScript.
+
+In this example, **es5** is specified, which means modern features such as the **let** keyword and fat-arrow function are not supported. When compiled, the **let** keyword
+ has been replaced with **var**, and the fat-arrow function has been replaced with a traditional function.
+
+**tsconfig.json**
+```
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "noEmitOnError": true
+    } 
+}
+```
+
+**index.ts**
+```
+let printMessage = (msg: string): void => console.log(`Message: ${ msg }`);
+let message = ("Hello, TypeScript");
+printMessage(message);
+```
+
+**index.js**
+```
+var printMessage = function (msg) { return console.log("Message: " + msg); };
+var message = ("Hello, TypeScript");
+printMessage(message);
+```
+
+The **Map** was added to JavaScript as part of the ES2015 specification, and is not part of the ES5 specification. If you tried to use **Map** in ES5 and
+ compiled, the following error will occur:
+
+```
+error TS2583: Cannot find name 'Map'. Do you need to change your
+target library? Try changing the `lib` compiler option to es2015 or later.
+6:50:49 AM - Found 2 errors. Watching for file changes.
+```
+
+To resolve this problem, I can target a later version of the JavaScript language, or I can change the type definitions used by the compiler with the **lib**
+ configuration property.
+
+```
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "noEmitOnError": true,
+        "lib": ["es5", "dom", "es2015.collection"]
+    } 
+}
+```
+
+**values for the lib compiler options**
+| Name | Description |
+| ---- | ----------- |
+| es6, es2016 | select the type definition files that correspond to a specific version |
+| esnext | selects features that are proposed additions to the JavaScript specification |
+| dom | selects type information files for the Domain Object Model (DOM) API that web applications use to manipulate the HTML content |
+| dom.iterable | provides type information for the additions to the DOM API that allow iteration over HTML elements |
+| sciphHost | selects type information for the Windows Script Host, which allows for automation on Windows systems |
+| webworker | selects type information for the web worker feature, which allows web applications to perform background tasks |
+
+**per-feature values for the lib compiler options**
+
+| Name | Description |
+| ---- | ----------- |
+| es2015.core | includes type information for the main features introduced by ES2015 |
+| es2015.collection | includes type information for the **Map** and **Set** collections |
+| es2015.generator, es2015.iterable | include type information for the generator and iterator features |
+| es2015.promise | includes type information for promises, which describe asynchronous actions |
+| es2015.reflect | includes type information for the reflection features that provide access to properties and prototypes |
+| es2015.symbol, es2015.symbol.wellknown | include type information about symbols |
+
+
 
 ### Selecting a Module Format
 
