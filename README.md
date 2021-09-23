@@ -255,19 +255,182 @@ To resolve this problem, I can target a later version of the JavaScript language
 | es2015.reflect | includes type information for the reflection features that provide access to properties and prototypes |
 | es2015.symbol, es2015.symbol.wellknown | include type information about symbols |
 
-
-
 ### Selecting a Module Format
 
-### Useful Compiler Configuration Settings
+Modules were standardized as part of the ES2016 specification. When writing TypeScript code, the standardized module features are used.
+
+The module system can be explicitely selected using the module setting in the **tsconfig.json** file.
+
+```
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "noEmitOnError": true,
+        "module": "commonjs"
+    } 
+}
+```
+
+| Name | Description |
+| ---- | ----------- |
+| none | disables modules |
+| commonjs | selects the CommonJS module format, which is supported by Node.js |
+| amd | selects the Asynchronous Module Definition (AMD), which is supported by the RequireJS module loader |
+| system | selects the module format supported by the SystemJS module loader |
+| umd | selects the Universal Module Definition module format |
+| es2015, es6 | selects the module format specified in the ES2016 language specification |
+| esnext | selects the module features that have been proposed for the next version of the JavaScript language |
+
+The TypeScript compiler can use two different approaches to resolving dependencies on modules: **classic** and **Node**. **Classic** mode
+ searches for modules in the local project. **Node** mode locates modules in the **node_modules** folder. The TypeScript compiler uses the
+ classic resolution mode when the module property is set to **es2015**, **system**, or **amd**. For all other module settings, the Node
+ resolution is used. A resolution style can be specified using the **moduleResolution** configuration property in the **tsconfig.json**
+ file using the **classic** or **node** value.
+
 
 ## Testing and Debugging TypeScript
 
+The difficulty with debugging a TypeScript application is that the code being executed is the product of the compiler, which transforms the
+ TypeScript code into pure JavaScript. To help the debugger correlate the JavaScript code with the TypeScript code, the compiler can generate
+ file known as **source maps**, which can be enabled in the **tsconfig.json** file. The compiler will generate a map file, which has the **map**
+ file extension, alongside the JavaScript files in the **dist** folder.
+
+```
+{
+    "compilerOptions": { 
+        "target": "es2018", 
+        "outDir": "./dist", 
+        "rootDir": "./src", 
+        "noEmitOnError": true, 
+        "module": "commonjs", 
+        "sourceMap": true
+    } 
+}
+```
+
+Code editors that have good TypeScript support allow breakpoints to be added to code files. When a JavaScript application is executed through a
+ debugger, execution halts when the **debugger** keyword is encountered, and control is passed to the developer, but the **debugger** keyword must
+ be removed before deployment.
+
+Node.js provides a basic integrated debugger using the **inspect** command.
+
+```
+node inspect dist/index.js
+```
+
+The debugger starts, loads the index.js file, and halts execution. Enter the **cont** command (or **c**) to resume execution, the debugger will
+ halt again when the **debugger** statement is reached. Expressions can be executed to inspect the state of the application using the **exec**
+ command, although expressions have to be quoted as strings.
+
+```
+< Debugger listening on ws://127.0.0.1:9229/698d3d43-a16d-4f9e-914f-f5c5995c9e7d
+<
+< For help, see: https://nodejs.org/en/docs/inspector
+<
+ ok
+< Debugger attached.
+<
+Break on start in dist/index.js:2
+  1 "use strict";
+> 2 Object.defineProperty(exports, "__esModule", { value: true });
+  3 const calc_1 = require("./calc");
+  4 let printMessage = (msg) => console.log(`Message: ${msg}`);
+debug> c
+< Message: Hello, TypeScript
+<
+break in dist/index.js:7
+  5 let message = ("Hello, TypeScript");
+  6 printMessage(message);
+> 7 debugger;
+  8 let total = calc_1.sum(100, 200, 300);
+  9 console.log(`Total: ${total}`);
+debug> exec("printMessage")
+[Function]
+debug> exec("message")
+'Hello, TypeScript'
+debug> c
+< Total: 600
+<
+< Waiting for the debugger to disconnect...
+<
+debug> .exit
+```
+
+**debug commands**
+| Command | Description |
+| ------- | ----------- |
+| run, restart, r | Run the application or reconnect |
+| kill | Kill a running application or disconnect |
+| cont, c | Resume execution |
+| next, n | Continue to next line in current file |
+| step, s | Step into, potentially entering a function |
+| out, o | Step out, leaving the current function |
+| backtrace, bt | Print the current backtrace |
+| list | Print the source around the current line where execution is currently paused |
+| setBreakpoint, sb | Set a breakpoint |
+| clearBreakpoint, cb | Clear a breakpoint |
+| breakpoints | List all known breakpoints |
+| breakOnException | Pause execution whenever an exception is thrown |
+| breakOnUncaught | Pause execution whenever an exception isn't caught |
+| breakOnNone | Don't pause on exceptions (this is the default) |
+| watch(expr) | Start watching the given expression |
+| unwatch(expr) | Stop watching an expression |
+| watchers | Print all watched expressions and their current values |
+| exec(expr) | Evaluate the expression and print the value |
+| repl | Enter a debug repl that works like exec |
+| scripts | List application scripts that are currently loaded |
+| scripts(true) | List all scripts (including node-internals) |
+| profile | Start CPU profiling session. |
+| profileEnd | Stop current CPU profiling session. |
+| profiles | Array of completed CPU profiling sessions. |
+| profiles[n].save(filepath = 'node.cpuprofile') | Save CPU profiling session to disk as JSON. |
+| takeHeapSnapshot(filepath = 'node.heapsnapshot') | Take a heap snapshot and save to disk as JSON. |
+
+A linter is a tool that checks code files using a set of rules that describe problems that cause confusion, produce unexpected results,
+ or reduce the readability of the code. The standard linter for TypeScript is TSLint.
+
+```
+npm install --save-dev tslint@5.16.0
+```
+
+To create the configuration required to use the linter, add a file called **tslint.json**. The linter comes with preconfigured sets of rules
+ that are specified using the **extends** setting.
+
+```
+{
+    "extends": [ "tslint:recommended" ],
+    "linterOptions": {
+        "format": "verbose"
+    }
+}
+```
+
+| Name | Description |
+| ---- | ----------- |
+| tslint:recommended | intended for general TypeScript development |
+| tslint:latest | extends recommended set to include recently defined rules |
+| tslint:all | contains all of the linter's rules, which can produce a large number of linting errors |
+
+The **linterOptions** settings select the **verbose** output format, which includes the name of the rules in the error messages, which
+ is important at first to determine how to tailor the linting settings.
+
+
+
 ### Debugging TypeScript Code
+
+
 
 ### Using the TypeScript Linter
 
+
+
 ### Unit Testing TypeScript
+
+
+
+
 
 # Running Projects
 
