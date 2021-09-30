@@ -292,6 +292,8 @@ The TypeScript compiler can use two different approaches to resolving dependenci
 
 ## Testing and Debugging TypeScript
 
+### Debugging TypeScript Code
+
 The difficulty with debugging a TypeScript application is that the code being executed is the product of the compiler, which transforms the
  TypeScript code into pure JavaScript. To help the debugger correlate the JavaScript code with the TypeScript code, the compiler can generate
  file known as **source maps**, which can be enabled in the **tsconfig.json** file. The compiler will generate a map file, which has the **map**
@@ -388,6 +390,8 @@ debug> .exit
 | profiles[n].save(filepath = 'node.cpuprofile') | Save CPU profiling session to disk as JSON. |
 | takeHeapSnapshot(filepath = 'node.heapsnapshot') | Take a heap snapshot and save to disk as JSON. |
 
+### Using the TypeScript Linter
+
 A linter is a tool that checks code files using a set of rules that describe problems that cause confusion, produce unexpected results,
  or reduce the readability of the code. The standard linter for TypeScript is TSLint.
 
@@ -416,21 +420,93 @@ To create the configuration required to use the linter, add a file called **tsli
 The **linterOptions** settings select the **verbose** output format, which includes the name of the rules in the error messages, which
  is important at first to determine how to tailor the linting settings.
 
+Lint rules can be disabled in the **tslint.json** file.
 
+```
+{
+    "extends": ["tslint:recommended"],
+    "linterOptions": {
+        "format": "verbose"
+    },
+    "rules": {
+        "eofline": false,
+        "no-console": false,
+        "prefer-const": false
+    }
+}
+```
 
-### Debugging TypeScript Code
+Lint rules can also be disabled in the code itself with a comment. This example tells the linter not to apply the **no-debugger** rule to the next code statement.
 
+```
+import { sum } from "./calc";
 
+let printMessage = (msg: string): void =>  console.log(`Message: ${ msg }`);
 
-### Using the TypeScript Linter
+let message = ("Hello, TypeScript");
+printMessage(message);
 
+// tslint:disable-next-line no-debugger
+debugger;
 
+let total = sum(100, 200, 300);
+console.log(`Total: ${total}`);
+```
 
 ### Unit Testing TypeScript
 
+```
+npm install --save-dev jest@24.7.1
+npm install --save-dev @types/jest
+npm install --save-dev ts-jest@24.0.2
+```
 
+The **jest** package contains the testing framework. The **@types/jest** package contains the type definitions for the Jest API, which means that tests can be written 
+ in TypeScript. The **ts-jest package** is a plugin to the Jest framework and is responsible for compiling TypeScript files before tests are applied.
 
+A file named **jest.config.js** is used to configure Jest. The **roots** setting is used to specify the location of the code files and unit tests. The **transform** 
+ setting is used to tell Jest that files with the **ts** and **tsx** file extensions should be processed with the **ts-jest** package.
 
+```
+module.exports = {
+    "roots": ["src"],
+    "transform": {"^.+\\.tsx?$": "ts-jest"}
+}
+```
+
+Tests are defined in files that have the **test.ts** file extension and are conventionally created alongside the code files. Tests are defined using the **test**
+ function, which is provided by Jest. The arguments are the name of the test followed by the function that performs the test. Jest provides the **expect** function
+ that is passed the result and used with a matcher function that specifies the expected result.
+
+```
+import { sum } from "./calc";
+
+test("check result value", () => {
+    let result = sum(10, 20, 30);
+    expect(result).toBe(60);
+});
+```
+
+**matcher functions**
+| Name | Description |
+| ---- | ----------- |
+| toBe(value) | asserts that a result is the same as the specified value (does not need to be the same object) |
+| toEqual(object) | asserts that a result is the same object as the specified value |
+| toMatch(regexp) | asserts that a result matches the specified regular expression |
+| toBeDefined() | asserts that the result has been defined |
+| toBeUndefined() | asserts that the result has not been defined |
+| toBeNull() | asserts that the result is null |
+| toBeTruthy() | asserts that the result is truthy |
+| toBeFalsy() | asserts that the result is falsy |
+| toContain(substring) | asserts that the result contains the specified substring |
+| toBeLessThan(value) | asserts that the result is less than the specified value |
+| toBeGreaterThan(value) | asserts that the result is greater than the specified value |
+
+Unit tests can be run as a one-off task or by using a watch mode that runs the tests when changes are detected.
+
+```
+npx jest --watchAll
+```
 
 # Running Projects
 
