@@ -27,11 +27,11 @@ export class TodoCollection {
     return this.itemMap.get(id);
   }
 
-  getTodoItems (includeComplete : boolean) : TodoItem[] {
+  getTodoItems (includeComplete : boolean = false) : TodoItem[] {
     return [... this.itemMap.values()].filter(item => includeComplete || !item.complete);
   }
 
-  markComplete (id: number, complete: boolean) {
+  markComplete (id: number, complete: boolean = true) {
     const todoItem = this.getTodoById(id);
     if (todoItem) {
       todoItem.complete = complete;
